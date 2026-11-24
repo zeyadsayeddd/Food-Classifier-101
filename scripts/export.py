@@ -17,6 +17,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "FoodClassifier101"))
 from model import create_effnetb3_model
+from weight_layout import weight_layout
 
 SOURCE = "https://huggingface.co/spaces/Zeyad-Sayed/Food-Classifier-101/resolve/54de17314c0f54b3915d7d37b2ea77f613748921/effnetb3.pth"
 CHECKSUM = "802a4ab5ba00e3618c374532d4f8993c16d49bc720c8b74f849d943679de755d"
@@ -54,6 +55,7 @@ def export(checkpoint, temporary, onnx_path):
     # Shuffle byte lanes before DEFLATE. Grouping sign/exponent bytes improves
     # compression of float weights. A short tail is stored verbatim.
     original = raw.read_bytes()
+    (ROOT / "scripts/weight-layout.json").write_text(json.dumps(weight_layout(original), separators=(",", ":")) + "\n")
     if onnx_path:
         onnx_path.write_bytes(original)
     aligned = len(original) - len(original) % 4

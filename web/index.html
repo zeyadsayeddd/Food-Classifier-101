@@ -6,7 +6,7 @@
   <meta name="description" content="Identify 101 kinds of food with a private food classifier that runs in your browser.">
   <title>Dish Index — Food classifier</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css"><script type="module" src="app.js?v=2"></script>
+  <link rel="stylesheet" href="style.css"><script type="module" src="app.js?v=3"></script>
 </head>
 <body>
 <svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -34,15 +34,15 @@
       <div class="control-heading"><span class="scan-mark"><svg><use href="#scan"/></svg></span><h2 id="analysis-heading">Dish analysis</h2></div>
       <div id="setup"><h3>Choose your photo</h3><p>Use a sample or add a photo of your own.</p>
       <button class="drop" id="choose"><svg><use href="#upload"/></svg><strong>Choose image</strong><span>or drop a JPG, PNG, or WebP here</span></button></div>
-      <div id="results" hidden><div class="result-title"><h3>Top matches</h3><span id="elapsed"></span></div><ol id="ranking"></ol></div>
+      <div id="results" hidden><div class="result-title"><h3 id="result-heading">Top matches</h3><span id="elapsed"></span></div><ol id="ranking"></ol></div>
       <span class="sr-only" id="announcement" role="status"></span>
       <p id="notice" role="status" aria-live="polite"></p>
-      <div class="actions"><button class="primary" id="analyze"><span>Identify dish</span><svg><use href="#arrow"/></svg></button><button id="change" hidden>Choose another photo</button></div>
+      <div class="actions"><button class="primary" id="analyze"><span>Identify dish</span><svg><use href="#arrow"/></svg></button><button id="run-live" hidden>Run this sample on my device</button><button id="change" hidden>Choose another photo</button></div>
       <p class="privacy"><svg><use href="#lock"/></svg>Your photos stay in this browser.</p>
       <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
     </section>
   </div>
 </main>
 <footer class="wrap"><span>Dish Index</span><span>EfficientNet-B3 <b>/</b> Food-101</span></footer>
-<dialog id="details"><h2>About the model</h2><p>Dish Index uses Zeyad Sayed’s EfficientNet-B3 model, trained on a subset of Food-101. It ranks 101 food categories and shows the five with the highest model scores.</p><p>The first analysis downloads the model. After that, the browser can reuse it. ONNX Runtime Web processes the center crop of each image locally.</p><p>Scores describe the model’s confidence among these categories. It can assign a dish to an unrelated photo.</p><button id="close">Close</button></dialog>
+<dialog id="details"><h2>About the model</h2><p>Dish Index uses Zeyad Sayed’s EfficientNet-B3 model, trained on a subset of Food-101. It ranks 101 food categories and shows the five with the highest model scores.</p><p>Samples open with saved model results. You can rerun them on your device. For a new photo, a compact model gives a quick estimate while the browser downloads the remaining data for the original full-precision scores. Downloaded parts are cached for later visits. ONNX Runtime Web processes the center crop of each image locally.</p><p>Scores describe the model’s confidence among these categories. It can assign a dish to an unrelated photo.</p><button id="close">Close</button></dialog>
 </body></html>

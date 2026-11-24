@@ -1,12 +1,17 @@
+import { examples } from "./samples-v3.js";
 const $ = id => document.getElementById(id);
 const analyze = $("analyze");
 const imageName = $("image-name");
 let selected = { src: $("preview").src };
 let worker, objectUrl, revision = 0, busy = false;
-let queue = Promise.resolve();
+
 
 function showProgress(message) {
-  analyze.querySelector("span").textContent = message;
+  if ($("results").dataset.stage === "quick" && !$("results").hidden) {
+    $("notice").textContent = message;
+  } else {
+    analyze.querySelector("span").textContent = message;
+  }
   if (selected.button) $("source").textContent = message;
 }
 function ready() {
@@ -16,6 +21,7 @@ function ready() {
 }
 function select(photo) {
   revision++;
+  analyze.removeAttribute("data-retry");
   $("announcement").textContent = "";
   ready();
   if (objectUrl) URL.revokeObjectURL(objectUrl);
@@ -29,6 +35,7 @@ function select(photo) {
   $("results").hidden = true;
   $("setup").hidden = false;
   $("change").hidden = true;
+  $("run-live").hidden = true;
   analyze.hidden = false;
   $("notice").textContent = "";
 }
@@ -39,6 +46,7 @@ function accept(file) {
     return;
   }
   select({ file, name: file.name });
+  try { getWorker().postMessage({ warm: true }); } catch { /* Identify can retry. */ }
 }
 const samples = [...$("samples").children];
 function trySample(button) {
@@ -61,7 +69,7 @@ for (const el of [$("frame"), document.querySelector(".controls")]) {
     accept(e.dataTransfer.files[0]);
   };
 }
-function showMatches({ matches, seconds }) {
+function showMatches({ matches, seconds, stage = "exact" }) {
   const rows = matches.map(({ label, probability }) => {
     const row = document.createElement("li");
     row.className = "match";
@@ -78,7 +86,12 @@ function showMatches({ matches, seconds }) {
     return row;
   });
   $("ranking").replaceChildren(...rows);
-  $("elapsed").textContent = seconds.toFixed(2) + " s";
+  $("results").dataset.stage = stage;
+  $("result-heading").textContent = stage === "quick" ? "Quick estimate" : "Top matches";
+  const timing = stage === "saved" ? "Saved example" : seconds.toFixed(2) + " s";
+  $("elapsed").textContent = stage === "exact" ? "Full precision · " + timing : timing;
+  $("notice").textContent = stage === "quick" ? "Refining with the original weights…" : "";
+  $("run-live").hidden = stage !== "saved";
   $("results").hidden = false;
   $("setup").hidden = true;
   analyze.hidden = true;
@@ -89,37 +102,41 @@ function showMatches({ matches, seconds }) {
 }
 function reportError(message) {
   ready();
+  analyze.dataset.retry = "true";
+  analyze.hidden = false;
   if (selected.button) $("source").textContent = "Sample photo";
   $("notice").textContent = message;
 }
-function runPrediction(file, current) {
-  if (current !== revision) return;
-  worker ??= new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
-  return new Promise((resolve, reject) => {
-    worker.onmessage = ({ data }) => {
-      if (data.status) {
-        if (current === revision || (busy && data.status.startsWith("Loading model"))) {
-          showProgress(data.status);
-        }
-        return;
-      }
-      if (current === revision) {
-        if (data.error) reportError(data.error);
-        else { ready(); showMatches(data); }
-      }
-      resolve();
-    };
-    worker.onerror = () => {
-      worker.terminate();
-      worker = null;
-      reject(new Error("Couldn’t start the classifier. Check your connection and retry."));
-    };
-    worker.postMessage(file);
-  });
+function getWorker() {
+  if (worker) return worker;
+  worker = new Worker(new URL("./worker.js?v=3", import.meta.url), { type: "module" });
+  worker.onmessage = ({ data }) => {
+    if (data.id !== revision) return;
+    if (data.status) showProgress(data.status);
+    else if (data.error) reportError(data.error);
+    else {
+      if (data.stage === "exact") ready();
+      showMatches(data);
+    }
+  };
+  worker.onerror = () => {
+    worker?.terminate();
+    worker = null;
+    if (busy) reportError("Couldn’t start the classifier. Check your connection and retry.");
+  };
+  return worker;
 }
-async function identify() {
+async function identify(live = false) {
   if (busy) return;
-  const current = revision;
+  const current = ++revision;
+  const saved = !selected.file && examples[new URL(selected.src).pathname.split("/").pop()];
+  if (saved && !live) {
+    showMatches({ matches: saved.matches, stage: "saved" });
+    return;
+  }
+  $("run-live").hidden = true;
+  $("results").hidden = true;
+  analyze.hidden = false;
   busy = true;
   analyze.disabled = true;
   showProgress("Preparing photo…");
@@ -133,14 +150,12 @@ async function identify() {
     }
     if (current !== revision) return;
     showProgress("Preparing model…");
-    // Finish any current inference and reuse its model download for the latest selection.
-    queue = queue.then(() => runPrediction(file, current)).catch(error => {
-      if (current === revision) reportError(error.message);
-    });
+    getWorker().postMessage({ file, id: current });
   } catch {
     if (current === revision) reportError("The photo couldn’t be opened. Choose it again and retry.");
   }
 }
-analyze.onclick = identify;
+analyze.onclick = () => identify(analyze.dataset.retry === "true");
+$("run-live").onclick = () => identify(true);
 $("about").onclick = () => $("details").showModal();
 $("close").onclick = () => $("details").close();

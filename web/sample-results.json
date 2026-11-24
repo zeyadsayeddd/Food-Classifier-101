@@ -1,0 +1,80 @@
+{
+  "model": "9dc6ff96f06a94fe0a6774a32dc64bfce16ec285c3184ca207e68434fc46b669",
+  "photos": {
+    "2582289.jpg": {
+      "sha256": "df90d709bd26feb7b71776daf5da4394931b018554c6ea4bc93e6eb32d2ade65",
+      "matches": [
+        {
+          "label": "pizza",
+          "probability": 0.6339810999831472
+        },
+        {
+          "label": "bruschetta",
+          "probability": 0.03221725440783912
+        },
+        {
+          "label": "lasagna",
+          "probability": 0.029007176600096517
+        },
+        {
+          "label": "huevos_rancheros",
+          "probability": 0.02877081363853931
+        },
+        {
+          "label": "omelette",
+          "probability": 0.028393677005389317
+        }
+      ]
+    },
+    "3622237.jpg": {
+      "sha256": "567ab5f7b062841e8776cfdd05775027c2d3d8439df3156d95b19b6693aa6230",
+      "matches": [
+        {
+          "label": "steak",
+          "probability": 0.666306566168693
+        },
+        {
+          "label": "crab_cakes",
+          "probability": 0.13525099829197146
+        },
+        {
+          "label": "filet_mignon",
+          "probability": 0.05958257435504846
+        },
+        {
+          "label": "pork_chop",
+          "probability": 0.02976733901936362
+        },
+        {
+          "label": "grilled_salmon",
+          "probability": 0.0253779011677775
+        }
+      ]
+    },
+    "592799.jpg": {
+      "sha256": "033c62d97c11b63756cf8807b35e736769374858f99ea04f4ee6e900af32a7df",
+      "matches": [
+        {
+          "label": "sushi",
+          "probability": 0.7979185090722987
+        },
+        {
+          "label": "paella",
+          "probability": 0.030607541541177608
+        },
+        {
+          "label": "frozen_yogurt",
+          "probability": 0.018071625265370584
+        },
+        {
+          "label": "miso_soup",
+          "probability": 0.015258691858802824
+        },
+        {
+          "label": "guacamole",
+          "probability": 0.008878109576145547
+        }
+      ]
+    }
+  }
+}

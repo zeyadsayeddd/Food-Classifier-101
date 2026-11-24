@@ -27,11 +27,14 @@ with sync_playwright() as playwright:
     browser = playwright.chromium.launch()
     page = browser.new_page(viewport={"width": 1280, "height": 840})
     requests = []
-    page.on("request", lambda r: requests.append((r.method, r.url)))
+    page.context.on("request", lambda r: requests.append((r.method, r.url)))
     page.on("pageerror", lambda e: print("Page error:", e, flush=True))
     page.on("console", lambda m: print("Browser:", m.text[:400], flush=True) if m.type == "error" else None)
     page.goto(site)
-    assert not any("onnx.shuffle" in url or url.endswith(".wasm") for _, url in requests)
+    def weight_requests():
+        return [url for _, url in requests if "/models/" in url and url.endswith(".gz")]
+
+    assert not weight_requests()
     page.get_by_role("button", name="About the model").click()
     page.get_by_role("button", name="Close").click()
     first_result = page.locator("#ranking li strong").first
@@ -41,6 +44,13 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name=f"Use {dish.lower()} sample").click()
         expect(first_result).to_have_text(dish, timeout=30000)
         expect(page.locator("#ranking li")).to_have_count(5)
+    expect(page.locator("#elapsed")).to_have_text("Saved example")
+    assert not weight_requests(), "Fixed samples should open without model or runtime downloads"
+    page.get_by_role("button", name="Run this sample on my device").click()
+    expect(page.locator("#results")).to_have_attribute("data-stage", "quick", timeout=180000)
+    expect(page.locator("#results")).to_have_attribute("data-stage", "exact", timeout=240000)
+    expect(first_result).to_have_text("Steak")
+    assert weight_requests(), "Live analysis should exercise the browser model"
     for photo, expected in reference.items():
         # Run the production pipeline on the browser's decode, then on Pillow's
         # RGB pixels as PNG to isolate browser JPEG decoder differences.
@@ -67,6 +77,14 @@ with sync_playwright() as playwright:
     page.get_by_role("button", name="Identify dish").click()
     page.locator("#ranking li").first.wait_for(timeout=180000)
     assert page.locator("#ranking li strong").first.inner_text() == "Steak"
+    expect(page.locator("#results")).to_have_attribute("data-stage", "exact", timeout=180000)
+    # A fresh worker after reload must be able to classify using only the persisted model assets.
+    page.reload()
+    page.context.route("**/models/*.gz", lambda route: route.abort())
+    page.locator("#file").set_input_files(str(ROOT / "web/examples/592799.jpg"))
+    page.get_by_role("button", name="Identify dish").click()
+    expect(page.locator("#results")).to_have_attribute("data-stage", "exact", timeout=60000)
+    expect(first_result).to_have_text("Sushi")
     assert all(method == "GET" and urlparse(url).netloc == urlparse(site).netloc
                for method, url in requests if url.startswith("http"))
     browser.close()
