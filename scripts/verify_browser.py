@@ -7,7 +7,7 @@ from urllib.parse import urljoin, urlparse
 
 import numpy as np
 from PIL import Image
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
@@ -34,8 +34,13 @@ with sync_playwright() as playwright:
     assert not any("onnx.shuffle" in url or url.endswith(".wasm") for _, url in requests)
     page.get_by_role("button", name="About the model").click()
     page.get_by_role("button", name="Close").click()
-    page.get_by_role("button", name="Identify dish").click()
-    page.locator("#ranking li").first.wait_for(timeout=180000)
+    first_result = page.locator("#ranking li strong").first
+    page.get_by_role("button", name="Try a sample").click()
+    expect(first_result).to_have_text("Steak", timeout=180000)
+    for dish in ("Pizza", "Sushi", "Steak"):
+        page.get_by_role("button", name=f"Use {dish.lower()} sample").click()
+        expect(first_result).to_have_text(dish, timeout=30000)
+        expect(page.locator("#ranking li")).to_have_count(5)
     for photo, expected in reference.items():
         # Run the production pipeline on the browser's decode, then on Pillow's
         # RGB pixels as PNG to isolate browser JPEG decoder differences.
@@ -55,7 +60,9 @@ with sync_playwright() as playwright:
             print(photo, kind, result["matches"][0]["label"], "max probability delta", difference, flush=True)
     page.set_viewport_size({"width": 375, "height": 812})
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    page.get_by_role("button", name="Use pizza sample").click()
     page.get_by_role("button", name="Use sushi sample").click()
+    expect(first_result).to_have_text("Sushi", timeout=30000)
     page.locator("#file").set_input_files(str(ROOT / "web/examples/3622237.jpg"))
     page.get_by_role("button", name="Identify dish").click()
     page.locator("#ranking li").first.wait_for(timeout=180000)

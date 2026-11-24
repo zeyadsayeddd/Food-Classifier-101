@@ -6,7 +6,7 @@
   <meta name="description" content="Identify 101 kinds of food with a private food classifier that runs in your browser.">
   <title>Dish Index — Food classifier</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script>
+  <link rel="stylesheet" href="style.css"><script type="module" src="app.js?v=2"></script>
 </head>
 <body>
 <svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
@@ -24,7 +24,7 @@
   <div class="workspace">
     <section class="input-card" aria-label="Food photo">
       <div class="frame" id="frame"><img id="preview" src="examples/2582289.jpg" alt="Margherita pizza with basil"><span class="photo-tag"><i></i><span id="source">Sample photo</span></span><div class="caption"><span id="image-name">Margherita pizza</span></div></div>
-      <div class="sample-row"><span>Try a sample</span><div id="samples">
+      <div class="sample-row"><button id="try-sample" type="button">Try a sample <span aria-hidden="true">↗</span></button><div id="samples">
         <button aria-label="Use pizza sample" aria-pressed="true" data-name="Margherita pizza" data-id="2582289"><img src="examples/2582289.jpg" alt=""></button>
         <button aria-label="Use steak sample" aria-pressed="false" data-name="Grilled steak" data-id="3622237"><img src="examples/3622237.jpg" alt=""></button>
         <button aria-label="Use sushi sample" aria-pressed="false" data-name="Sushi assortment" data-id="592799"><img src="examples/592799.jpg" alt=""></button>

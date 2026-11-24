@@ -1,6 +1,6 @@
 # Food Classifier 101
 
-[Open Dish Index on GitHub Pages](https://zeyadsayeddd.github.io/Food-Classifier-101/). Choose a sample or drop a food photo, then select **Identify dish** for the five highest-scoring Food-101 labels. Inference runs in a browser worker using ONNX Runtime Web and WebAssembly. Photos stay on the device.
+[Open Dish Index on GitHub Pages](https://zeyadsayeddd.github.io/Food-Classifier-101/). Click **Try a sample** or any sample thumbnail to see its five highest-scoring Food-101 labels. For your own photo, drop the image and select **Identify dish**. Inference runs in a browser worker using ONNX Runtime Web and WebAssembly. Photos stay on the device.
 
 ## Model and preprocessing
 
