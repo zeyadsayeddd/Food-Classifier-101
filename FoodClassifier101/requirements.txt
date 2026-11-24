@@ -1,6 +1,6 @@
-torch>=2.0.0
-torchvision>=0.15.0
+torch==2.5.1
+torchvision==0.20.1
+onnx==1.17.0
+onnxruntime==1.23.2
 numpy<2
-gradio>=3.0.0
-anyio>=3.0.0
-fsspec>=2023.1.0
+pillow>=9.4

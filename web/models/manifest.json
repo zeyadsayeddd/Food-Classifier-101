@@ -1,0 +1,19 @@
+{
+  "file": "effnetb3-9dc6ff96f06a94fe.onnx.shuffle.gz",
+  "sha256": "9dc6ff96f06a94fe0a6774a32dc64bfce16ec285c3184ca207e68434fc46b669",
+  "bytes": 43351251,
+  "downloadBytes": 37164257,
+  "resize": 320,
+  "crop": 300,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "interpolation": "bicubic"
+}
